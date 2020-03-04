@@ -16,7 +16,8 @@
       return {}
     },
     created() {},
-    methods: {},
+    methods: {
+    },
     components: {
       CropperJS
     },
@@ -37,6 +38,14 @@
       width: 600px;
       height: 430px;
       /*background: rgba(0, 0, 0, .2);*/
+    }
+
+    .tz_box {
+      height: 100px;
+      width: 200px;
+      line-height: 100px;
+      text-align: center;
+      border: 1px dashed #333;
     }
   }
 </style>

@@ -1,6 +1,12 @@
 <template>
   <div class="CropperJS">
-    <div class="c_img_box c_img_bg">
+    <div
+      @dragleave.prevent="dragOver = false"
+      @dragover.prevent="dragOver = true"
+      @drop.prevent="onDrop"
+      @paste="handlePaste"
+      class="c_img_box c_img_bg"
+    >
       <img
         class="cropper-image"
         ref="imgRef"
@@ -18,10 +24,10 @@
           <button @click="magnify" type="button">放大</button>
           <button @click="scale('X')" type="button">左右翻转</button>
           <button @click="scale('Y')" type="button">上下翻转</button>
-          <button @click="move(0, -moveStep)" type="button">下</button>
-          <button @click="move(-moveStep, 0)" type="button">右</button>
-          <button @click="move(0, moveStep)" type="button">上</button>
-          <button @click="move(moveStep, 0)" type="button">左</button>
+          <button @click="move(0, -moveStep)" type="button">上</button>
+          <button @click="move(-moveStep, 0)" type="button">左</button>
+          <button @click="move(0, moveStep)" type="button">下</button>
+          <button @click="move(moveStep, 0)" type="button">右</button>
           <button @click="crop" style="width: 100%;" type="button">完成裁剪</button>
         </div>
       </div>
@@ -33,6 +39,7 @@
   import Cropper from 'cropperjs'
   import 'cropperjs/dist/cropper.min.css'
 
+  // 上传按钮组件
   const UpImage = {
     props: {
       type: {
@@ -64,7 +71,6 @@
         this.isError = false
         const input = e.target
         const files = e.target.files
-        console.log(files[0])
         if (files && files[0]) {
           const file = files[0]
           let length = isNaN(parseInt(this.maxLength)) ? 3 : parseInt(this.maxLength)
@@ -99,7 +105,10 @@
       return h(
         'div',
         {
-          class: ['c_btn_box', { 'is_error': this.isError }]
+          class: ['c_btn_box', { 'is_error': this.isError }],
+          attrs: {
+            id: `c_button_box_${this._uid}`
+          }
         },
         [
           h('label', {
@@ -126,14 +135,15 @@
         ]
       )
     }
-  }
+  } // 上传按钮组件
 
   export default {
     name: 'CropperJS',
     data() {
       return {
         cropper: null,
-        insideSrc: ''
+        insideSrc: '',
+        dragOver: false
       }
     },
     props: {
@@ -167,12 +177,10 @@
           dragMode: 'move',
           aspectRatio: 9 / 9 // 相片比例
         }, this.options))
-        console.log(this._uid)
       },
       onChange(e) {
-        console.log(e)
         this.replace(e.value)
-      },
+      }, // 获取图片
       replace(src) {
         this.cropper.replace(src)
         this.insideSrc = src
@@ -197,7 +205,39 @@
           console.log(blob)
           this.$emit('on-crop', blob)
         })
-      } // 裁剪后的图片数据
+      }, // 裁剪后的图片数据
+      onDrop(e) {
+        this.uploadFiles(e.dataTransfer.files)
+      }, // 事件
+      handlePaste(e) {
+        this.uploadFiles(e.target.files)
+      }, // 事件
+      uploadFiles(file) {
+        file = file[0]
+        if ((/image/).test(file.type)) {
+          let reader = new FileReader()
+          reader.readAsDataURL(file)
+          reader.onload = () => {
+            let base = reader.result
+            let name = file.name
+            let arr = base.split(',')
+            let mime = arr[0].match(/:(.*?);/)[1]
+            let bstr = atob(arr[1])
+            let n = bstr.length
+            let u8arr = new Uint8Array(n)
+            while (n--) {
+              u8arr[n] = bstr.charCodeAt(n)
+            }
+            let a = new File([u8arr], name, { type: mime })
+            let src = window.URL.createObjectURL(a)
+            console.log(src)
+            this.replace(src)
+          }
+          //其他格式文件被选中
+        } else {
+          console.log('文件格式不正确，请拖取png或jpg格式')
+        }
+      } // 获取拖拽过来的图片！并赋值给裁剪插件
     },
     components: {
       UpImage

@@ -35,7 +35,7 @@
 <style lang="scss" scoped>
   .index {
     .lv_cropperJS {
-      width: 600px;
+      width: 800px;
       height: 430px;
       /*background: rgba(0, 0, 0, .2);*/
     }

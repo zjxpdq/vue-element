@@ -5,8 +5,9 @@
       @dragover.prevent="dragOver = true"
       @drop.prevent="onDrop"
       @paste="handlePaste"
-      class="c_img_box c_img_bg"
+      :class="['c_img_box c_img_bg']"
     >
+      <p class="c_hint" v-show="!insideSrc">请将图片拖拽至此处</p>
       <img
         class="cropper-image"
         ref="imgRef"
@@ -265,9 +266,18 @@
 
     .c_img_box {
       height: 100%;
-      flex: 2;
+      flex: 3;
       overflow: hidden;
       margin-right: 20px;
+      position: relative;
+
+      .c_hint {
+        font-size: 20px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
     }
 
     .c_img_right {
